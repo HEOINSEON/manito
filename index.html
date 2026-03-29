@@ -27,7 +27,7 @@
             <p class="text-gray-500 text-sm text-balance">선생님과 아이들 30명이 함께 마음을 나눠요!</p>
         </header>
 
-        <!-- 선택 영역 -->
+        <!-- 학생 및 선생님 선택 -->
         <div id="selection-area">
             <label for="student-select" class="block text-left text-gray-700 font-bold mb-2 ml-1">내 이름 선택</label>
             <select id="student-select" class="w-full p-4 rounded-2xl border-2 border-rose-100 focus:border-rose-300 outline-none bg-white text-lg mb-6 shadow-sm">
@@ -51,10 +51,11 @@
             <p class="text-xs text-gray-400 italic">결과는 시트에 기록되며 비밀 유지가 생명입니다! 🤫</p>
         </div>
 
-        <!-- 결과 영역 -->
+        <!-- 결과 표시 -->
         <div id="result-area" class="hidden">
             <div class="bg-rose-50 rounded-2xl p-6 border-2 border-dashed border-rose-200 mb-6">
-                <p class="text-gray-600 mb-4 font-bold">당신이 챙겨야 할 주인공은?</p>
+                <p class="text-gray-600 mb-4 font-bold font-lg">당신이 챙겨야 할 주인공은?</p>
+                
                 <div class="grid grid-cols-1 gap-4">
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100">
                         <span class="text-xs text-rose-400 font-bold block mb-1 uppercase tracking-wider">첫 번째 마니또</span>
@@ -66,13 +67,15 @@
                     </div>
                 </div>
             </div>
-            <p class="text-sm text-gray-500 mb-6 handwriting text-2xl">
+            
+            <p class="text-sm text-gray-500 mb-6 handwriting text-2xl px-2">
                 "누군가를 생각하는 예쁜 마음이<br>우리 반을 더 따뜻하게 만들 거예요."
             </p>
+            
             <button onclick="location.reload()" class="text-rose-400 text-sm font-bold border-b border-rose-200 pb-1">처음으로 돌아가기</button>
         </div>
 
-        <!-- 로딩 영역 -->
+        <!-- 로딩 -->
         <div id="loading" class="hidden py-12">
             <div class="flex flex-col items-center">
                 <div class="animate-spin rounded-full h-14 w-14 border-t-4 border-b-4 border-rose-500 mb-4"></div>
@@ -80,13 +83,13 @@
             </div>
         </div>
 
-        <!-- 관리자 패널 -->
+        <!-- 교사용 비밀 패널 -->
         <div class="mt-12 pt-8 border-t border-gray-100">
             <button onclick="toggleAdmin()" class="text-gray-300 text-[10px] hover:text-rose-300">ADMIN ACCESS</button>
             <div id="admin-panel" class="hidden mt-4 bg-rose-50 p-6 rounded-2xl border border-rose-100">
                 <h3 class="text-rose-600 font-bold text-sm mb-3 text-left">교사 전용 메뉴</h3>
                 <input type="password" id="admin-pw" placeholder="비번 (1010)" class="p-3 border rounded-xl mb-3 w-full text-sm outline-none focus:ring-2 focus:ring-rose-200 border-rose-200">
-                <button onclick="adminGenerate()" class="w-full bg-rose-400 text-white py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-500 transition-colors">30인 마니또 새로 생성하기</button>
+                <button onclick="adminGenerate()" class="w-full bg-rose-400 text-white py-3 rounded-xl text-sm font-bold hover:bg-rose-500 transition-colors shadow-sm">30인 마니또 새로 생성하기</button>
             </div>
         </div>
     </div>
@@ -98,7 +101,7 @@
 
         function handleCheck() {
             const name = document.getElementById('student-select').value;
-            if (!name) return alert("성함을 선택해 주세요! 😊");
+            if (!name) return alert("먼저 본인의 이름을 선택해 주세요! 😊");
 
             document.getElementById('selection-area').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
@@ -109,7 +112,7 @@
                     document.getElementById('result-area').classList.remove('hidden');
                     document.getElementById('manitto-a').innerText = "홍길동 (테스트)";
                     document.getElementById('manitto-b').innerText = "이순신 (테스트)";
-                }, 800);
+                }, 1000);
                 return;
             }
 
@@ -117,16 +120,17 @@
                 .withSuccessHandler(function(res) {
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('result-area').classList.remove('hidden');
+                    
                     if(res.error) {
-                        alert(res.error);
+                        alert("에러: " + res.error);
                         location.reload();
                     } else {
-                        document.getElementById('manitto-a').innerText = res.a;
-                        document.getElementById('manitto-b').innerText = res.b;
+                        document.getElementById('manitto-a').innerText = res.a || "(배정 전)";
+                        document.getElementById('manitto-b').innerText = res.b || "(배정 전)";
                     }
                 })
                 .withFailureHandler(function(err) {
-                    alert("데이터를 가져오지 못했습니다. 선생님께 확인 요청해 주세요!");
+                    alert("데이터 호출 실패: " + err);
                     location.reload();
                 })
                 .checkManitto(name);
@@ -138,14 +142,15 @@
 
         function adminGenerate() {
             const pw = document.getElementById('admin-pw').value;
-            if(pw !== '1010') return alert("비밀번호가 다릅니다.");
-            if(!confirm("모든 학생의 마니또를 랜덤으로 새로 배정하시겠습니까?")) return;
+            if(pw !== '1010') return alert("비밀번호 오류");
+            
+            if(!confirm("30명 명단으로 새로 생성하시겠습니까?")) return;
 
-            if (!isGasEnv()) return alert("실제 웹앱 환경에서 실행해 주세요.");
+            if (!isGasEnv()) return alert("웹앱 배포 환경에서 실행하세요.");
 
             google.script.run
                 .withSuccessHandler(function(res) { alert(res); })
-                .withFailureHandler(function(err) { alert("생성 실패: " + err); })
+                .withFailureHandler(function(err) { alert("오류: " + err); })
                 .generateManittoMapping();
         }
     </script>
