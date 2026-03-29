@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-10반 비밀 마니또</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Gowun Dodum', sans-serif; background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); }
+        .handwriting { font-family: 'Nanum Pen Script', cursive; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .card-enter { animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-gradient { background: linear-gradient(to right, #ff9a9e, #fad0c4); transition: transform 0.2s; }
+        .btn-gradient:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full glass rounded-3xl p-8 shadow-2xl text-center card-enter">
+        <header class="mb-8">
+            <h1 class="text-4xl handwriting text-rose-500 mb-2">🍭 2-10반 비밀 마니또 🍭</h1>
+            <p class="text-gray-500 text-sm text-balance">선생님과 아이들 30명이 함께 마음을 나눠요!</p>
+        </header>
+
+        <!-- 선택 영역 -->
+        <div id="selection-area">
+            <label for="student-select" class="block text-left text-gray-700 font-bold mb-2 ml-1">내 이름 선택</label>
+            <select id="student-select" class="w-full p-4 rounded-2xl border-2 border-rose-100 focus:border-rose-300 outline-none bg-white text-lg mb-6 shadow-sm">
+                <option value="">-- 명단에서 골라주세요 --</option>
+                <option value="기현민">기현민</option><option value="김건휘">김건휘</option><option value="김도영">김도영</option>
+                <option value="김민준">김민준</option><option value="김시현">김시현</option><option value="박시연">박시연</option>
+                <option value="박준서">박준서</option><option value="방민태">방민태</option><option value="방서연">방서연</option>
+                <option value="백은우">백은우</option><option value="신효주">신효주</option><option value="양하민">양하민</option>
+                <option value="염시현">염시현</option><option value="오지환">오지환</option><option value="유서진">유서진</option>
+                <option value="유수현">유수현</option><option value="이민균">이민균</option><option value="이민지">이민지</option>
+                <option value="이서윤">이서윤</option><option value="이승아">이승아</option><option value="이승훈">이승훈</option>
+                <option value="이유빈">이유빈</option><option value="이윤후">이윤후</option><option value="이율">이율</option>
+                <option value="장서윤">장서윤</option><option value="정한결">정한결</option><option value="피가윤">피가윤</option>
+                <option value="홍은율">홍은율</option><option value="황이솔">황이솔</option>
+                <option value="담임선생님">담임선생님</option>
+            </select>
+
+            <button onclick="handleCheck()" id="check-btn" class="w-full py-4 rounded-2xl btn-gradient text-white font-bold text-xl shadow-lg mb-4">
+                비밀 마니또 확인하기 ✨
+            </button>
+            <p class="text-xs text-gray-400 italic">결과는 시트에 기록되며 비밀 유지가 생명입니다! 🤫</p>
+        </div>
+
+        <!-- 결과 영역 -->
+        <div id="result-area" class="hidden">
+            <div class="bg-rose-50 rounded-2xl p-6 border-2 border-dashed border-rose-200 mb-6">
+                <p class="text-gray-600 mb-4 font-bold">당신이 챙겨야 할 주인공은?</p>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100">
+                        <span class="text-xs text-rose-400 font-bold block mb-1 uppercase tracking-wider">첫 번째 마니또</span>
+                        <span id="manitto-a" class="text-3xl font-bold text-gray-800">-</span>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100">
+                        <span class="text-xs text-rose-400 font-bold block mb-1 uppercase tracking-wider">두 번째 마니또</span>
+                        <span id="manitto-b" class="text-3xl font-bold text-gray-800">-</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-6 handwriting text-2xl">
+                "누군가를 생각하는 예쁜 마음이<br>우리 반을 더 따뜻하게 만들 거예요."
+            </p>
+            <button onclick="location.reload()" class="text-rose-400 text-sm font-bold border-b border-rose-200 pb-1">처음으로 돌아가기</button>
+        </div>
+
+        <!-- 로딩 영역 -->
+        <div id="loading" class="hidden py-12">
+            <div class="flex flex-col items-center">
+                <div class="animate-spin rounded-full h-14 w-14 border-t-4 border-b-4 border-rose-500 mb-4"></div>
+                <p class="text-rose-500 font-bold">비밀 정보를 가져오고 있어요...</p>
+            </div>
+        </div>
+
+        <!-- 관리자 패널 -->
+        <div class="mt-12 pt-8 border-t border-gray-100">
+            <button onclick="toggleAdmin()" class="text-gray-300 text-[10px] hover:text-rose-300">ADMIN ACCESS</button>
+            <div id="admin-panel" class="hidden mt-4 bg-rose-50 p-6 rounded-2xl border border-rose-100">
+                <h3 class="text-rose-600 font-bold text-sm mb-3 text-left">교사 전용 메뉴</h3>
+                <input type="password" id="admin-pw" placeholder="비번 (1010)" class="p-3 border rounded-xl mb-3 w-full text-sm outline-none focus:ring-2 focus:ring-rose-200 border-rose-200">
+                <button onclick="adminGenerate()" class="w-full bg-rose-400 text-white py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-500 transition-colors">30인 마니또 새로 생성하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function isGasEnv() {
+            return typeof google !== 'undefined' && google.script && google.script.run;
+        }
+
+        function handleCheck() {
+            const name = document.getElementById('student-select').value;
+            if (!name) return alert("성함을 선택해 주세요! 😊");
+
+            document.getElementById('selection-area').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            if (!isGasEnv()) {
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('result-area').classList.remove('hidden');
+                    document.getElementById('manitto-a').innerText = "홍길동 (테스트)";
+                    document.getElementById('manitto-b').innerText = "이순신 (테스트)";
+                }, 800);
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('result-area').classList.remove('hidden');
+                    if(res.error) {
+                        alert(res.error);
+                        location.reload();
+                    } else {
+                        document.getElementById('manitto-a').innerText = res.a;
+                        document.getElementById('manitto-b').innerText = res.b;
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    alert("데이터를 가져오지 못했습니다. 선생님께 확인 요청해 주세요!");
+                    location.reload();
+                })
+                .checkManitto(name);
+        }
+
+        function toggleAdmin() {
+            document.getElementById('admin-panel').classList.toggle('hidden');
+        }
+
+        function adminGenerate() {
+            const pw = document.getElementById('admin-pw').value;
+            if(pw !== '1010') return alert("비밀번호가 다릅니다.");
+            if(!confirm("모든 학생의 마니또를 랜덤으로 새로 배정하시겠습니까?")) return;
+
+            if (!isGasEnv()) return alert("실제 웹앱 환경에서 실행해 주세요.");
+
+            google.script.run
+                .withSuccessHandler(function(res) { alert(res); })
+                .withFailureHandler(function(err) { alert("생성 실패: " + err); })
+                .generateManittoMapping();
+        }
+    </script>
+</body>
+</html>
